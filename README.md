@@ -32,5 +32,5 @@ Writing boilerplate CRUD operations manually is time-consuming and error-prone. 
 
 ---
 **Developed with ❤️ by Joudi**
-* **LinkedIn:** [Joudi Mohammad](https://www.linkedin.com/in/joudi-mohammad-002685283)
+* **LinkedIn:** [Joudi Adeeb Mohammad](https://www.linkedin.com/in/joudi-mohammad-002685283)
 * **Telegram:** [@Joudi_Adeeb](https://t.me/Joudi_Adeeb)
