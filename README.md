@@ -1,6 +1,6 @@
 # ADO.NET 3-Tier Code Generator 🚀
 
-[Read in Arabic 🇸🇾](README-ar.md)
+[Read in Arabic ](README-ar.md)
 
 A powerful, interactive Command Line Interface (CLI) tool built with C# to completely automate the generation of Data Access Layer (DAL) and Business Logic Layer (BLL) code for ADO.NET 3-Tier architecture projects.
 
@@ -14,7 +14,7 @@ Writing boilerplate CRUD operations manually is time-consuming and error-prone. 
 * **Highly Customizable:** Pick and choose exactly which columns and methods you want to generate.
 
 ## 📸 Screenshots
-![CLI Demo](Link-To-Your-Image-Here)
+![CLI Demo](Code-Generator.png)
 
 ## 🛠️ How to Use
 1. Clone the repository and open the solution in Visual Studio.
@@ -32,5 +32,5 @@ Writing boilerplate CRUD operations manually is time-consuming and error-prone. 
 
 ---
 **Developed with ❤️ by Joudi**
-* **LinkedIn:** [Joudi Mohammad](https://www.linkedin.com/in/joudi-mohammad-002685283)
+* **LinkedIn:** [Joudi Adeeb Mohammad](https://www.linkedin.com/in/joudi-mohammad-002685283)
 * **Telegram:** [@Joudi_Adeeb](https://t.me/Joudi_Adeeb)

@@ -16,11 +16,10 @@
 5. انسخ الكود المولد وألصقه في مشروعك!
 
 ## لقطات شاشة (Screenshots) 📸
-*(نصيحة: خذ صورة لشاشة الكونسول الملونة تبعك وارفعها هون، بتعطي منظر احترافي جداً)*
-![Console Interface](ضع-رابط-الصورة-هنا)
+![Console Interface](Code-Generator.png)
 
 ## التواصل 💬
 تم تطوير هذه الأداة كحل عملي لتسريع عملية التطوير في مشاريع .NET. 
 إذا كان لديك أي اقتراح أو واجهت مشكلة، يسعدني تواصلك:
-- **Telegram:** [@YourTelegramUsername](https://t.me/Joudi_Adeeb)
-- **LinkedIn:** [Your Name](https://www.linkedin.com/in/joudi-mohammad-002685283 )
+- **Telegram:** [@Joudi_Adeeb](https://t.me/Joudi_Adeeb)
+- **LinkedIn:** [Joudi Adeeb Mohammad](https://www.linkedin.com/in/joudi-mohammad-002685283)
