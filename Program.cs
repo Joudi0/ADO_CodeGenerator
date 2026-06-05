@@ -91,6 +91,14 @@ namespace CodeGenarator
 
             }
 
+            Console.Write("For BLL: Save Method? yes/no: ");
+            answer = Console.ReadLine();
+            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
+            {
+                BLLFuncs += clsBLL.saveFunc();
+
+
+            }
             Console.Write("isExist? yes/no: ");
             answer = Console.ReadLine();
             if (answer.ToLower() == "yes" || answer.ToLower() == "y")

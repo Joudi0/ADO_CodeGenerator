@@ -119,26 +119,25 @@ namespace CodeGenarator
                 $@"public static bool {FunctionName}({writeParameters(columnIndex)})
                 {{
                     bool isFound = false;
-                    SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
+                    using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
                     string query = ""SELECT * FROM {tableName} WHERE {Columns[columnIndex].name} = @{Columns[columnIndex].name}"";
-                    SqlCommand command = new SqlCommand(query, connection);
+                    using SqlCommand command = new SqlCommand(query, connection);
                     command.Parameters.AddWithValue(""@{Columns[columnIndex].name}"", {Columns[columnIndex].name});
                     try
                     {{
                         connection.Open();
-                        SqlDataReader reader = command.ExecuteReader();
+                        using SqlDataReader reader = command.ExecuteReader();
+
 
                         if (reader.Read())
                         {{
                             isFound = true;
 {updateParametersValue(columnIndex)}
                         }}
-                        reader.Close();
                     }}
 
-                     catch (Exception ex) {{ isFound = false; throw;}}
+                     catch (Exception ex) {{ throw;}}
 
-                     finally {{ connection.Close(); }}
                     return isFound;
                 }}";
 
@@ -152,22 +151,19 @@ namespace CodeGenarator
                 $@"public static bool update{objectName}({writeParameters(byRef: false)})
                 {{
                     int rowsAffected = 0;
-                    SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
+                    using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
                     string query = @""{updateScript(columnName)}"";
-                    SqlCommand command = new SqlCommand(query, connection);
+                    using SqlCommand command = new SqlCommand(query, connection);
                     {addWithValueAllScript(false)}
                     try
                     {{
                         connection.Open();
                         rowsAffected = command.ExecuteNonQuery();
                     }}
-                    catch (Exception) {{ return false; }}
-                    finally {{ connection.Close(); }}
-
+                    catch (Exception) {{ throw; }}
                     return (rowsAffected > 0);
                 }}";
             return Function;
-
         }
 
         public static string addFunc(string columnName)
@@ -177,9 +173,9 @@ namespace CodeGenarator
                 $@"public static int add{objectName}({writeParameters(0, false, false)})
                 {{
                     int {objectName}ID = -1;
-                    SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
+                    using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
                     string query = @""{addScript()}"";
-                    SqlCommand command = new SqlCommand(query, connection);
+                    using SqlCommand command = new SqlCommand(query, connection);
                     {addWithValueAllScript()}
                     try
                     {{
@@ -190,8 +186,7 @@ namespace CodeGenarator
                             {objectName}ID = insertedID;
                         }}
                     }}
-                    catch (Exception) {{ }}
-                    finally {{ connection.Close(); }}
+                    catch (Exception) {{ throw; }}
 
                     return {objectName}ID;
                 }}";
@@ -200,16 +195,16 @@ namespace CodeGenarator
 
         public static string deleteFunc(string columnName)
         {
+            if (Columns.Count == 0) return "Error in the lists";
             int columnIndex = getColumnIndex(columnName);
             Column c = Columns[columnIndex];
 
-            if (Columns.Count == 0) return "Error in the lists";
             string Function = $@"public static bool delete{objectName}({c.type} {c.name})
             {{
                 int rowsAffected = 0;
-                SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
+                using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
                 string query = ""DELETE FROM {tableName} WHERE {columnName} = @{columnName}"";
-                SqlCommand command = new SqlCommand(query, connection);
+                using SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue(""@{columnName}"", {columnName});
                 try
                 {{
@@ -217,7 +212,6 @@ namespace CodeGenarator
                     rowsAffected = command.ExecuteNonQuery();
                 }}
                 catch (Exception) {{ throw; }}
-                finally {{ connection.Close(); }}
                 return (rowsAffected > 0);
             }}";
             return Function;
@@ -230,19 +224,17 @@ namespace CodeGenarator
                     public static DataTable getAll()
                     {{
                         DataTable dt = new DataTable();
-                        SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
+                        using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
                         string query = ""SELECT * FROM {tableName}"";
-                        SqlCommand command = new SqlCommand(query, connection);
+                        using SqlCommand command = new SqlCommand(query, connection);
 
                         try
                         {{
                             connection.Open();
-                            SqlDataReader reader = command.ExecuteReader();
+                            using SqlDataReader reader = command.ExecuteReader();
                             if (reader.HasRows) dt.Load(reader);
-                            reader.Close();
                         }}
-                        catch (Exception) {{ }}
-                        finally {{ connection.Close(); }}
+                        catch (Exception) {{ throw; }}
 
                         return dt;
                     }}";
@@ -265,20 +257,18 @@ namespace CodeGenarator
                     public static DataTable {FunctionName}({Columns[columnIndex].type} {columnName})
                     {{
                         DataTable dt = new DataTable();
-                        SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
+                        using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
                         string query = ""SELECT * FROM {tableName} WHERE {Columns[columnIndex].name} = @{Columns[columnIndex].name}"";
-                        SqlCommand command = new SqlCommand(query, connection);
+                        using SqlCommand command = new SqlCommand(query, connection);
                         command.Parameters.AddWithValue(""@{Columns[columnIndex].name}"", {Columns[columnIndex].name});
 
                         try
                         {{
                             connection.Open();
-                            SqlDataReader reader = command.ExecuteReader();
+                            using SqlDataReader reader = command.ExecuteReader();
                             if (reader.HasRows) dt.Load(reader);
-                            reader.Close();
                         }}
-                        catch (Exception) {{ }}
-                        finally {{ connection.Close(); }}
+                        catch (Exception) {{ throw; }}
 
                         return dt;
                     }}";
@@ -299,9 +289,9 @@ namespace CodeGenarator
             public static bool {FunctionName}({mappedColumns[columnIndex].type} {mappedColumns[columnIndex].name})
             {{
                 bool isFound = false;
-                SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
+                using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
                 string query = ""SELECT Found=1 FROM {tableName} WHERE {columnName} = @{columnName}"";
-                SqlCommand command = new SqlCommand(query, connection);
+                using SqlCommand command = new SqlCommand(query, connection);
                 command.Parameters.AddWithValue(""@{columnName}"", {columnName});
 
                 try
@@ -310,8 +300,7 @@ namespace CodeGenarator
                     object result = command.ExecuteScalar();
                     isFound = (result != null);
                 }}
-                catch (Exception) {{ }}
-                finally {{ connection.Close(); }}
+                catch (Exception) {{ throw; }}
 
                 return isFound;
             }}";
@@ -327,6 +316,3 @@ namespace CodeGenarator
        
     }
 }
-
-
-

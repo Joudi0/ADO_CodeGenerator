@@ -247,7 +247,6 @@ namespace CodeGenarator
                 }}
                 return new DataTable();
             }}
-
 ";
             return Function;
         }
@@ -302,7 +301,3 @@ namespace BLL
        
     }
 }
-
-
-
-
