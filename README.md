@@ -7,18 +7,17 @@ A powerful, interactive Command Line Interface (CLI) tool built with C# to compl
 Writing boilerplate CRUD operations manually is time-consuming and error-prone. This tool reads your database schema and instantly generates secure, ready-to-use C# classes, saving you hours of repetitive work.
 Features
 
-    Automated CRUD & SPs Generation: Instantly generates robust Stored Procedures (SPs) along with the corresponding Data Access Layer (DAL) and Business Logic Layer (BLL) code.
+Automated CRUD & SPs Generation: Instantly generates robust Stored Procedures (SPs) along with the corresponding Data Access Layer (DAL) and Business Logic Layer (BLL) code.
 
-    Performance-Driven Architecture: Uses Stored Procedures to improve database performance, security, and maintainability.
+Performance-Driven Architecture: Uses Stored Procedures to improve database performance, security, and maintainability.
 
-    Smart Database Schema Mapping: Automatically connects to your database to fetch metadata, verifying table structures and types to ensure 100% code accuracy.
+Smart Database Schema Mapping: Automatically connects to your database to fetch metadata, verifying table structures and types to ensure 100% code accuracy.
 
-    Modern CLI Experience: Powered by Spectre.Console for an interactive, visually appealing, and user-friendly interface.
+Modern CLI Experience: Powered by Spectre.Console for an interactive, visually appealing, and user-friendly interface.
 
-    Secure & Robust: Built-in protection against SQL Injection through strictly parameterized queries and safe DBNull handling.
+Secure & Robust: Built-in protection against SQL Injection through strictly parameterized queries and safe DBNull handling.
 
-    Highly Customizable: Fully flexible generation process—choose exactly which CRUD operations and filtered filters (Get By/Is Exist By) you need for your business requirements
-    
+Highly Customizable: Fully flexible generation process—choose exactly which CRUD operations and filtered filters (Get By/Is Exist By) you need for your business requirements
 * [Spectre.Console](https://spectreconsole.net/) (For the interactive UI)
 
 ---
