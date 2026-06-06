@@ -5,29 +5,20 @@
 A powerful, interactive Command Line Interface (CLI) tool built with C# to completely automate the generation of Data Access Layer (DAL) and Business Logic Layer (BLL) code for ADO.NET 3-Tier architecture projects.
 
 Writing boilerplate CRUD operations manually is time-consuming and error-prone. This tool reads your database schema and instantly generates secure, ready-to-use C# classes, saving you hours of repetitive work.
+Features
 
-## ✨ Features
-* **Automated CRUD Generation:** Instantly generates methods for Add, Update, Delete, Get All, Get By ID, and Check Exists.
-* **Smart Validation:** Automatically connects to your database to verify table names and columns before generating code, preventing typos and runtime crashes.
-* **Modern CLI Experience:** Built with `Spectre.Console` to provide a beautiful, interactive, and colorful user interface with keyboard navigation.
-* **SQL Injection Proof:** Generated code safely handles `DBNull` values and strictly uses SQL Parameters.
-* **Highly Customizable:** Pick and choose exactly which columns and methods you want to generate.
+    Automated CRUD & SPs Generation: Instantly generates robust Stored Procedures (SPs) along with the corresponding Data Access Layer (DAL) and Business Logic Layer (BLL) code.
 
-## 📸 Screenshots
-![CLI Demo](Code-Generator.png)
+    Performance-Driven Architecture: Uses Stored Procedures to improve database performance, security, and maintainability.
 
-## 🛠️ How to Use
-1. Clone the repository and open the solution in Visual Studio.
-2. Open `clsHelper.cs` and update the `connectionString` to point to your local SQL Server database.
-3. Run the application.
-4. Enter your target Table Name and Class Name.
-5. Follow the interactive prompts to select the columns and methods you need.
-6. Copy the generated DAL and BLL code from the console directly into your project!
+    Smart Database Schema Mapping: Automatically connects to your database to fetch metadata, verifying table structures and types to ensure 100% code accuracy.
 
-## 💻 Tech Stack
-* C# / .NET
-* ADO.NET
-* SQL Server
+    Modern CLI Experience: Powered by Spectre.Console for an interactive, visually appealing, and user-friendly interface.
+
+    Secure & Robust: Built-in protection against SQL Injection through strictly parameterized queries and safe DBNull handling.
+
+    Highly Customizable: Fully flexible generation process—choose exactly which CRUD operations and filtered filters (Get By/Is Exist By) you need for your business requirements
+    
 * [Spectre.Console](https://spectreconsole.net/) (For the interactive UI)
 
 ---
