@@ -132,35 +132,34 @@ namespace CodeGenarator
             return Constructors;
         }
 
-        public static string isExistsFunc(string columnName)
+        public static string isExistsFunc(Column C)
         {
-            int columnIndex = getColumnIndex(columnName);
             string FunctionName = "";
-            if (columnIndex == 0)
+            if (getColumnIndex(C.name) == 0)
             {
                 FunctionName = $@"is{objectName}ExistByID";
             }
-            else FunctionName = $@"is{objectName}ExistBy{columnName}";
-            string Function = $@"public static bool {FunctionName}({Columns[columnIndex].type} {Columns[columnIndex].name})
+            else FunctionName = $@"is{objectName}ExistBy{C.name}";
+            string Function = $@"public static bool {FunctionName}({C.type} {C.name})
             {{
-                return {DALName}.{FunctionName}({Columns[columnIndex].name});
+                return {DALName}.{FunctionName}({C.name});
                 
             }}
 ";
             return Function;
         }
 
-        public static string getByFunc(Column col)
+        public static string getByFunc(Column C)
         {
-            int columnIndex = getColumnIndex(col.name);
+            int columnIndex = getColumnIndex(C.name);
             string FunctionName = "";
             if (columnIndex == 0)
             {
                 FunctionName = $@"get{objectName}ByID";
             }
-            else FunctionName = $@"get{objectName}By{col.name}";
+            else FunctionName = $@"get{objectName}By{C.name}";
             string Function = $@"
-            public static cls{objectName} {FunctionName}({col.type} {col.name})
+            public static cls{objectName} {FunctionName}({C.type} {C.name})
             {{
 {initalVars(columnIndex)}
                 if({DALName}.{FunctionName}({writeParametersToSend(true, columnIndex)}))
@@ -197,20 +196,20 @@ namespace CodeGenarator
             return Function;
         }
         
-        public static string deleteFunc(Column col)
+        public static string deleteFunc(Column C)
         {
             string FunctionName = $@"delete{objectName}";
             string secondFuncName = "";
 
-            if (getColumnIndex(col.name) == 0) secondFuncName = $@"is{objectName}ExistByID";
-            else secondFuncName = $@"is{objectName}ExistBy{col.name}";
+            if (getColumnIndex(C.name) == 0) secondFuncName = $@"is{objectName}ExistByID";
+            else secondFuncName = $@"is{objectName}ExistBy{C.name}";
 
             string Function = $@"
-        public static bool {FunctionName}({col.type} {col.name})
+        public static bool {FunctionName}({C.type} {C.name})
         {{
-            if({secondFuncName}({col.name}))
+            if({secondFuncName}({C.name}))
             {{
-                return {DALName}.delete{objectName}({col.name});
+                return {DALName}.delete{objectName}({C.name});
             }}
             else return false;
         }}
@@ -231,26 +230,25 @@ namespace CodeGenarator
             return Function;
         }
 
-        public static string getAllByFunc(Column col)
+        public static string getAllByFunc(Column C)
         {
-            string FunctionName = "getAllBy" + col.name;
+            string FunctionName = "getAllBy" + C.name;
             string secondFuncName = "";
-            if (getColumnIndex(col.name) == 0) secondFuncName = $@"is{objectName}ExistByID";
-            else secondFuncName = $@"is{objectName}ExistBy{col.name}";
+            if (getColumnIndex(C.name) == 0) secondFuncName = $@"is{objectName}ExistByID";
+            else secondFuncName = $@"is{objectName}ExistBy{C.name}";
 
             string Function = $@"
-            public static DataTable {FunctionName}({col.type} {col.name})
+            public static DataTable {FunctionName}({C.type} {C.name})
             {{
-                if({secondFuncName}({col.name}))
+                if({secondFuncName}({C.name}))
                 {{
-                    return {DALName}.{FunctionName}({col.name});
+                    return {DALName}.{FunctionName}({C.name});
                 }}
                 return new DataTable();
             }}
 ";
             return Function;
         }
-
 
         public static string saveFunc()
         {
@@ -298,6 +296,5 @@ namespace BLL
 ";
             return classStructure;
         }
-       
     }
 }

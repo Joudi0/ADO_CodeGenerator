@@ -179,6 +179,8 @@
     <Compile Include="clsBLL.cs" />
     <Compile Include="clsDAL.cs" />
     <Compile Include="clsHelper.cs" />
+    <Compile Include="clsPresentation.cs" />
+    <Compile Include="clsSPs.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

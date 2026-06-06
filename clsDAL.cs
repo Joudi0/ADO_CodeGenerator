@@ -10,8 +10,6 @@ namespace CodeGenarator
 {
     public class clsDAL
     {
-
-
         // Helpers
 
         public static string updateParametersValue(int index)
@@ -44,25 +42,10 @@ namespace CodeGenarator
             return parameters;
         }
 
-        public static string updateScript(string columnName)
-        {
-
-            string script = $"UPDATE {tableName} SET\n";
-            List<Column> cols = new List<Column>(mappedColumns);
-            cols.RemoveAt(0);
-            foreach (Column col in cols)
-            {
-                script += $"\t\t    {col.name} = @{col.name},\n";
-            }
-            string result = script.Substring(0, script.Length - 2);
-            result += $@" WHERE {columnName} = @{columnName};";
-            return result;
-        }
-
         public static string addWithValueAllScript(bool withoutFirst = true)
         {
             List<Column> newColumns = new List<Column>(mappedColumns);
-            if(withoutFirst) newColumns.RemoveAt(0);
+            if (withoutFirst) newColumns.RemoveAt(0);
             string script = "";
             string tabs = "\n\t\t    ";
             foreach (Column col in newColumns)
@@ -85,49 +68,31 @@ namespace CodeGenarator
             return script;
         }
 
-        public static string addScript()
-        {
-            List<Column> newColumns = new List<Column>(mappedColumns);
-            newColumns.RemoveAt(0);
-            string script = $"INSERT INTO {tableName} (";
-            foreach (Column col in newColumns)
-            {
-                script += $@"{col.name}, ";
-            }
-            string script2 = script.Substring(0, script.Length - 2) + ")\nVALUES (";
-            foreach (Column col in newColumns)
-            {
-                script2 += $@"@{col.name}, ";
-            }
-            string result = script2.Substring(0, script2.Length - 2) + ");\nSELECT SCOPE_IDENTITY();";
-            return result;
-        }
 
         // Actual Functions
 
-        public static string getRecordByColumnFunc(string columnName)
+        public static string getRecordByColumnFunc(Column C)
         {
-            int columnIndex = getColumnIndex(columnName);
+            int columnIndex = getColumnIndex(C.name);
             string FunctionName = "";
             if (columnIndex == 0)
             {
                 FunctionName = $@"get{objectName}ByID";
             }
-            else FunctionName = $@"get{objectName}By{columnName}";
+            else FunctionName = $@"get{objectName}By{C.name}";
             if (Columns.Count == 0) return "Error in the lists";
             string Function =
                 $@"public static bool {FunctionName}({writeParameters(columnIndex)})
                 {{
                     bool isFound = false;
                     using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
-                    string query = ""SELECT * FROM {tableName} WHERE {Columns[columnIndex].name} = @{Columns[columnIndex].name}"";
-                    using SqlCommand command = new SqlCommand(query, connection);
-                    command.Parameters.AddWithValue(""@{Columns[columnIndex].name}"", {Columns[columnIndex].name});
+                    using SqlCommand command = new SqlCommand(""SP_{tableName}_SelectBy{C.name}"", connection);
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue(""@{C.name}"", {C.name});
                     try
                     {{
                         connection.Open();
                         using SqlDataReader reader = command.ExecuteReader();
-
 
                         if (reader.Read())
                         {{
@@ -135,8 +100,7 @@ namespace CodeGenarator
 {updateParametersValue(columnIndex)}
                         }}
                     }}
-
-                     catch (Exception ex) {{ throw;}}
+                     catch (Exception) {{ throw;}}
 
                     return isFound;
                 }}";
@@ -144,16 +108,16 @@ namespace CodeGenarator
             return Function;
         }
 
-        public static string updateFunc(string columnName)
+        public static string updateFunc(Column C)
         {
-            if (Columns.Count == 0) return "Error in the lists";
+            if (Columns.Count == 0) return "Error in the lists, The Column List is Empty";
             string Function =
                 $@"public static bool update{objectName}({writeParameters(byRef: false)})
                 {{
                     int rowsAffected = 0;
                     using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
-                    string query = @""{updateScript(columnName)}"";
-                    using SqlCommand command = new SqlCommand(query, connection);
+                    using SqlCommand command = new SqlCommand(""SP_{tableName}_Update"", connection);
+                    command.CommandType = CommandType.StoredProcedure;
                     {addWithValueAllScript(false)}
                     try
                     {{
@@ -166,7 +130,7 @@ namespace CodeGenarator
             return Function;
         }
 
-        public static string addFunc(string columnName)
+        public static string addFunc()
         {
             if (Columns.Count == 0) return "Error in the lists";
             string Function =
@@ -174,8 +138,8 @@ namespace CodeGenarator
                 {{
                     int {objectName}ID = -1;
                     using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
-                    string query = @""{addScript()}"";
-                    using SqlCommand command = new SqlCommand(query, connection);
+                    using SqlCommand command = new SqlCommand(""SP_{tableName}_Insert"", connection);
+                    command.CommandType = CommandType.StoredProcedure;
                     {addWithValueAllScript()}
                     try
                     {{
@@ -193,19 +157,17 @@ namespace CodeGenarator
             return Function;
         }
 
-        public static string deleteFunc(string columnName)
+        public static string deleteFunc(Column C)
         {
             if (Columns.Count == 0) return "Error in the lists";
-            int columnIndex = getColumnIndex(columnName);
-            Column c = Columns[columnIndex];
 
-            string Function = $@"public static bool delete{objectName}({c.type} {c.name})
+            string Function = $@"public static bool delete{objectName}({C.type} {C.name})
             {{
                 int rowsAffected = 0;
                 using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
-                string query = ""DELETE FROM {tableName} WHERE {columnName} = @{columnName}"";
-                using SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue(""@{columnName}"", {columnName});
+                using SqlCommand command = new SqlCommand(""SP_{tableName}_Delete"", connection);
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue(""@{C.name}"", {C.name});
                 try
                 {{
                     connection.Open();
@@ -219,14 +181,13 @@ namespace CodeGenarator
 
         public static string getAllFunc()
         {
-
             string Function = $@"
                     public static DataTable getAll()
                     {{
                         DataTable dt = new DataTable();
                         using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
-                        string query = ""SELECT * FROM {tableName}"";
-                        using SqlCommand command = new SqlCommand(query, connection);
+                        using SqlCommand command = new SqlCommand(""SP_{tableName}_SelectAll"", connection);
+                        command.CommandType = CommandType.StoredProcedure;
 
                         try
                         {{
@@ -241,26 +202,24 @@ namespace CodeGenarator
             return Function;
         }
 
-
-        public static string getAllByColumnFunc(string columnName)
+        public static string getAllByColumnFunc(Column C)
         {
-            int columnIndex = getColumnIndex(columnName);
             string FunctionName = "";
-            if (columnIndex == 0)
+            if (getColumnIndex(C.name) == 0)
             {
                 FunctionName = $@"getAllByID";
             }
-            else FunctionName = $@"getAllBy{columnName}";
+            else FunctionName = $@"getAllBy{C.name}";
             if (Columns.Count == 0) return "Error in the lists";
 
             string Function = $@"
-                    public static DataTable {FunctionName}({Columns[columnIndex].type} {columnName})
+                    public static DataTable {FunctionName}({C.type} {C.name})
                     {{
                         DataTable dt = new DataTable();
                         using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
-                        string query = ""SELECT * FROM {tableName} WHERE {Columns[columnIndex].name} = @{Columns[columnIndex].name}"";
-                        using SqlCommand command = new SqlCommand(query, connection);
-                        command.Parameters.AddWithValue(""@{Columns[columnIndex].name}"", {Columns[columnIndex].name});
+                        using SqlCommand command = new SqlCommand(""SP_{tableName}_SelectAllBy{C.name}"", connection);
+                        command.CommandType = CommandType.StoredProcedure;
+                        command.Parameters.AddWithValue(""@{C.name}"", {C.name});
 
                         try
                         {{
@@ -275,30 +234,31 @@ namespace CodeGenarator
             return Function;
         }
 
-
-        public static string isExistsFunc(string columnName)
+        public static string isExistsFunc(Column C)
         {
-            int columnIndex = getColumnIndex(columnName);
             string FunctionName = "";
-            if (columnIndex == 0)
+            if (getColumnIndex(C.name) == 0)
             {
                 FunctionName = $@"is{objectName}ExistByID";
             }
-            else FunctionName = $@"is{objectName}ExistBy{columnName}";
+            else FunctionName = $@"is{objectName}ExistBy{C.name}";
             string Function = $@"
-            public static bool {FunctionName}({mappedColumns[columnIndex].type} {mappedColumns[columnIndex].name})
+            public static bool {FunctionName}({C.type} {C.name})
             {{
                 bool isFound = false;
                 using SqlConnection connection = new SqlConnection(clsDataSettings.connectionString);
-                string query = ""SELECT Found=1 FROM {tableName} WHERE {columnName} = @{columnName}"";
-                using SqlCommand command = new SqlCommand(query, connection);
-                command.Parameters.AddWithValue(""@{columnName}"", {columnName});
+                using SqlCommand command = new SqlCommand(""SP_{tableName}_IsExistBy{C.name}"", connection);
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddWithValue(""@{C.name}"", {C.name});
 
                 try
                 {{
                     connection.Open();
                     object result = command.ExecuteScalar();
-                    isFound = (result != null);
+                    if (result != null && int.TryParse(result.ToString(), out int res))
+                    {{
+                        isFound = (res == 1);
+                    }}
                 }}
                 catch (Exception) {{ throw; }}
 
@@ -307,12 +267,21 @@ namespace CodeGenarator
             return Function;
         }
 
-
         public static string classStructure(string injectedString)
         {
-            string structure = $@"using Microsoft.Data.SqlClient;\r\nusing System;\r\nusing System.Collections.Generic;\r\nusing System.Data;\r\n\r\nnamespace DAL\r\n{{\r\n    public class cls{objectName}DAL\r\n    {{  {injectedString}  }}\r\n}}";
+            string structure = $@"using Microsoft.Data.SqlClient;
+using System;
+using System.Collections.Generic;
+using System.Data;
+
+namespace DAL
+{{
+    public class cls{objectName}DAL
+    {{  
+{injectedString}  
+    }}
+}}";
             return structure;
         }
-       
     }
 }

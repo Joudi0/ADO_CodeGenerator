@@ -18,6 +18,33 @@ namespace CodeGenarator
 
         public static List<Column> Columns;
         public static List<Column> mappedColumns;
+        public static Column makeMappedColumnByName(string name)
+        {
+            int index = clsHelper.getColumnIndex(name);
+            if(index == -1)
+            {
+                Console.WriteLine($"Column with name '{name}' not found.");
+                return new Column();
+            }
+            else
+            {
+                return mappedColumns[clsHelper.getColumnIndex(name)];
+            }
+        }
+        public static Column makeColumnByName(string name)
+        {
+            int index = clsHelper.getColumnIndex(name);
+            if (index == -1)
+            {
+                Console.WriteLine($"Column with name '{name}' not found.");
+                return new Column();
+            }
+            else
+            {
+                return mappedColumns[clsHelper.getColumnIndex(name)];
+            }
+        }
+
         public static List<Column> getColumnsNameAndType()
         {
             List<Column> columnsList = new List<Column>();

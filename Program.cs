@@ -10,12 +10,6 @@ namespace CodeGenarator
 
         static void Main(string[] args)
         {
-
-
-
-
-
-
             AnsiConsole.Write(
                                     new FigletText("ADO Gen Code")
                                         .Centered()
@@ -24,119 +18,8 @@ namespace CodeGenarator
             AnsiConsole.Write(new Rule("[yellow]Welcome in Joudi's Code Generator[/]").Justify(Justify.Left));
             AnsiConsole.MarkupLine("[grey]This tool generates DAL and BLL CRUD ADO.NET for you.[/]");
             AnsiConsole.MarkupLine("[red]Notice:[/] Please ensure database settings are configured in [cyan]clsHelper.connectionString[/].\n");
-
-            Console.Write("Enter Table Name: ");
-            clsHelper.tableName = Console.ReadLine();
-
-            int count = 0;
-            do
-            {
-                clsHelper.Columns = clsHelper.getColumnsNameAndType();
-                if(clsHelper.Columns.Count == 0)
-                {
-                    Console.WriteLine("No Columns Found, Please Enter a Valid Table Name: ");
-                    clsHelper.tableName = Console.ReadLine();
-
-                }
-                else
-                {
-                    count = clsHelper.Columns.Count;
-                }
-
-            } while (count == 0);
-            clsHelper.mappedColumns = clsHelper.mappingTheColumns(clsHelper.Columns);
-
-            Console.Write("Enter The Class Name For Both DAL And BLL (cls First will be added on it): ");
-            clsHelper.objectName = Console.ReadLine() ;
-
-            string answer = "yes";
-            string DALFuncs = "";
-            string BLLFuncs = initiateBLL();
-
-            Console.Write("\nFor Both DAL And BLL:\n");
-            List<string> getByColumns = getBy();
-            foreach (string col in getByColumns)
-            {
-                DALFuncs += clsDAL.getRecordByColumnFunc(col);
-                clsHelper.Column c = clsHelper.mappedColumns[clsHelper.getColumnIndex(col)];
-                BLLFuncs += clsBLL.getByFunc(c);
-            }
-
-
-            Console.Write("update? yes/no: ");
-            answer = Console.ReadLine();
-            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
-            {
-                DALFuncs += clsDAL.updateFunc(clsHelper.Columns[0].name);
-                BLLFuncs += clsBLL.updateFunc();
-
-            }
-
-            Console.Write("delete? yes/no: ");
-            answer = Console.ReadLine();
-            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
-            {
-                DALFuncs += clsDAL.deleteFunc(clsHelper.Columns[0].name);
-                BLLFuncs += clsBLL.deleteFunc(clsHelper.mappedColumns[0]);
-
-            }
-
-            Console.Write("add? yes/no: ");
-            answer = Console.ReadLine();
-            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
-            {
-                DALFuncs += clsDAL.addFunc(clsHelper.Columns[0].name);
-                BLLFuncs += clsBLL.addFunc();
-
-
-            }
-
-            Console.Write("For BLL: Save Method? yes/no: ");
-            answer = Console.ReadLine();
-            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
-            {
-                BLLFuncs += clsBLL.saveFunc();
-
-
-            }
-            Console.Write("isExist? yes/no: ");
-            answer = Console.ReadLine();
-            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
-            {
-                List<string> Columns = existBy();
-                foreach (string col in Columns)
-                {
-                    DALFuncs += clsDAL.isExistsFunc(col);
-                    BLLFuncs += clsBLL.isExistsFunc(col);
-                }
-            }
-
-
-
-            Console.Write("getAll? yes/no: ");
-            answer = Console.ReadLine();
-            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
-            {
-                DALFuncs += clsDAL.getAllFunc();
-                BLLFuncs += clsBLL.getAllFunc();
-                Console.WriteLine("GetAll Method Generated, do you want 'GetAll By' ? (yes/no): ");
-                answer = Console.ReadLine();
-                if(answer.ToLower() == "yes" || answer.ToLower() == "y")
-                {
-                    List<string> Columns = getAllBy();
-                    foreach (string col in Columns)
-                    {
-                        DALFuncs += clsDAL.getAllByColumnFunc(col);
-                        clsHelper.Column c = clsHelper.mappedColumns[clsHelper.getColumnIndex(col)];
-                        BLLFuncs += clsBLL.getAllByFunc(c);
-                    }
-                }
-            }
-          
-            Console.WriteLine("\nDAL:");
-            Console.WriteLine("\n\n\n" + clsDAL.classStructure(DALFuncs) + "\n\n\n");
-            Console.WriteLine("\nBLL:");
-            Console.WriteLine("\n\n\n" + clsBLL.classStructure(BLLFuncs) + "\n\n\n");
+            clsHelper.Columns = clsHelper.getColumnsNameAndType();
+            Run();
 
             AnsiConsole.WriteLine();
             var signaturePanel = new Panel(
@@ -156,114 +39,154 @@ namespace CodeGenarator
             Console.ReadKey();
         }
 
-        // DAL Functions
-        public static List<string> getBy()
+        public static void Run()
         {
-            List<string> Columns = new List<string>();
-            string answer = "yes";
+
+
+            Console.Write("Enter Table Name: ");
+            clsHelper.tableName = Console.ReadLine();
+
+            int count = 0;
             do
             {
-                Console.Write("Enter the column name to generate 'Get By' method for it: ");
-                string columnName = Console.ReadLine();
-
-                if (getColumnIndex(columnName) < 0)
+                clsHelper.Columns = clsHelper.getColumnsNameAndType();
+                if (clsHelper.Columns.Count == 0)
                 {
-                    Console.WriteLine("Column not Found.\n");
+                    Console.WriteLine("No Columns Found, Please Enter a Valid Table Name: ");
+                    clsHelper.tableName = Console.ReadLine();
+
                 }
                 else
                 {
+                    count = clsHelper.Columns.Count;
+                }
+
+            } while (count == 0);
+            clsHelper.mappedColumns = clsHelper.mappingTheColumns(clsHelper.Columns);
+
+            Console.Write("Enter The Class Name For Both DAL And BLL (cls First will be added on it): ");
+            clsHelper.objectName = Console.ReadLine();
+
+            string answer = "yes";
+            string DALFuncs = "";
+            string BLLFuncs = clsPresentation.initiateBLL();
+            string SPs = "";
+            Console.Write("\nFor DAL, BLL, And Stored Procedures:\n");
+
+            // Get By:
+
+            List<string> getByColumns = clsPresentation.getBy();
+            foreach (string colName in getByColumns)
+            {
+                clsHelper.Column C = clsHelper.makeMappedColumnByName(colName);
+                clsHelper.Column column = clsHelper.makeColumnByName(colName);
+                SPs += clsSPs.selectByColumnSP(column);
+                DALFuncs += clsDAL.getRecordByColumnFunc(C);
+                BLLFuncs += clsBLL.getByFunc(C);
+            }
+
+            // Update:
+
+            Console.Write("update? yes/no: ");
+            answer = Console.ReadLine();
+            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
+            {
+                DALFuncs += clsDAL.updateFunc(clsHelper.mappedColumns[0]);
+                BLLFuncs += clsBLL.updateFunc();
+                SPs += clsSPs.updateSP();
+
+
+            }
+
+            // Delete:
+
+            Console.Write("delete? yes/no: ");
+            answer = Console.ReadLine();
+            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
+            {
+                Column C = clsHelper.mappedColumns[0];
+                DALFuncs += clsDAL.deleteFunc(C);
+                BLLFuncs += clsBLL.deleteFunc(C);
+                SPs += clsSPs.deleteSP();
+            }
+
+            // Add:
+
+            Console.Write("add? yes/no: ");
+            answer = Console.ReadLine();
+            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
+            {
+                DALFuncs += clsDAL.addFunc();
+                BLLFuncs += clsBLL.addFunc();
+                SPs += clsSPs.addSP();
+
+            }
+
+            // isExist:
+
+            Console.Write("isExist? yes/no: ");
+            answer = Console.ReadLine();
+            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
+            {
+                List<string> Columns = clsPresentation.existBy();
+                foreach (string colName in Columns)
+                {
+                    clsHelper.Column C = clsHelper.makeMappedColumnByName(colName);
+                    clsHelper.Column column = clsHelper.makeColumnByName(colName);
                     
-                    Columns.Add(columnName);
+                    DALFuncs += clsDAL.isExistsFunc(C);
+                    BLLFuncs += clsBLL.isExistsFunc(C);
+                    SPs += clsSPs.isExistByColumnSP(C);
 
                 }
-                Console.Write("Do you want to add another 'Get By' method? yes/no: ");
-                answer = Console.ReadLine();
+            }
 
-            } while (answer.ToLower() == "yes" || answer.ToLower() == "y");
-            return Columns;
-        }
-
-        public static List<string> existBy()
-        {
-            List<string> Columns = new List<string>();
-
-            string answer = "yes";
-            do
-            {
-                Console.Write("Enter the column name to generate 'isExist By' method for it: ");
-                string columnName = Console.ReadLine();
-
-                if (getColumnIndex(columnName) < 0)
-                {
-                    Console.WriteLine("Column not Found.\n");
-                }
-                else
-                {
-                    Columns.Add(columnName);
-
-                }
-                Console.WriteLine("Do you want to add another 'isExist By' method? yes/no");
-                answer = Console.ReadLine();
-
-            } while (answer.ToLower() == "yes" || answer.ToLower() == "y");
-            return Columns;
-        }
+            // getAll:
 
 
-        public static List<string> getAllBy()
-        {
-            List<string> Columns = new List<string>();
-
-            string answer = "yes";
-            do
-            {
-                Console.Write("Enter the column name to generate 'getAll By' method for it: ");
-                string columnName = Console.ReadLine();
-
-                if (getColumnIndex(columnName) < 0)
-                {
-                    Console.WriteLine("Column not Found.\n");
-                }
-                else
-                {
-                    Columns.Add(columnName);
-
-                }
-                Console.WriteLine("Do you want to add another 'getAll By' method? yes/no: ");
-                answer = Console.ReadLine();
-
-            } while (answer.ToLower() == "yes" || answer.ToLower() == "y");
-            return Columns;
-        }
-
-        // BLL Functions
-
-        public static string initiateBLL()
-        {
-            string answer = "yes";
-            string BLLFuncs = "";
-            Console.Write("For BLL: Generate Properties? (yes/no): ");
+            Console.Write("getAll? yes/no: ");
             answer = Console.ReadLine();
             if (answer.ToLower() == "yes" || answer.ToLower() == "y")
             {
-                BLLFuncs += clsBLL.writeProperties();
-            }
+                DALFuncs += clsDAL.getAllFunc();
+                BLLFuncs += clsBLL.getAllFunc();
+                SPs += clsSPs.selectAllSP();
+                Console.WriteLine("GetAll Method Generated, do you want 'GetAll By' ? (yes/no): ");
+                answer = Console.ReadLine();
+                if (answer.ToLower() == "yes" || answer.ToLower() == "y")
+                {
+                    List<string> Columns = clsPresentation.getAllBy();
+                    foreach (string colName in Columns)
+                    {
+                        clsHelper.Column C = clsHelper.makeMappedColumnByName(colName);
+                        clsHelper.Column column = clsHelper.makeColumnByName(colName);
+                        SPs += clsSPs.selectAllBySP(column);
+                        BLLFuncs += clsBLL.getAllByFunc(C);
+                        DALFuncs += clsDAL.getAllByColumnFunc(C);
 
-            Console.Write("For BLL: Generate Empty Constructor? (yes/no): ");
+                    }
+                }
+            }
+            Console.Write("For BLL: Save Method? yes/no: ");
             answer = Console.ReadLine();
             if (answer.ToLower() == "yes" || answer.ToLower() == "y")
             {
-                BLLFuncs += clsBLL.writeConstructors(true);
-            }
-            Console.Write("For BLL: Generate Full Constructor? (yes/no): ");
-            answer = Console.ReadLine();
-            if (answer.ToLower() == "yes" || answer.ToLower() == "y")
-            {
-                BLLFuncs += clsBLL.writeConstructors(false);
+                BLLFuncs += clsBLL.saveFunc();
+
+
             }
 
-            return BLLFuncs;
-        }
+            Console.WriteLine("Stored Procedures:");
+            Console.WriteLine("\n\n\n" + SPs + "\n\n\n");
+
+            Console.WriteLine("\nDAL:");
+            Console.WriteLine("\n\n\n" + clsDAL.classStructure(DALFuncs) + "\n\n\n");
+            Console.WriteLine("\nBLL:");
+            Console.WriteLine("\n\n\n" + clsBLL.classStructure(BLLFuncs) + "\n\n\n");
+            
+            }
+
 
     }
+
 }
