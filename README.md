@@ -18,8 +18,8 @@ Modern CLI Experience: Powered by Spectre.Console for an interactive, visually a
 Secure & Robust: Built-in protection against SQL Injection through strictly parameterized queries and safe DBNull handling.
 
 Highly Customizable: Fully flexible generation process—choose exactly which CRUD operations and filtered filters (Get By/Is Exist By) you need for your business requirements
-* [Screenshoot]
-* ![ADO Gen Code Tool](images/Code-Generator.png)
+Screenshoot:
+* ![ADO Gen Code Tool](Code-Generator.png)
   
 **Developed with ❤️ by Joudi**
 * **LinkedIn:** [Joudi Adeeb Mohammad](https://www.linkedin.com/in/joudi-mohammad-002685283)
