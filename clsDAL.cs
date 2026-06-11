@@ -14,7 +14,7 @@ namespace CodeGenarator
 
         public static string updateParametersValue(int index)
         {
-            List<Column> newColumns = mappingTheColumns(Columns);
+            List<Column> newColumns = new List<Column>(getColumnsForCsharp(Columns));
             newColumns.RemoveAt(index);
             string parameters = "";
             foreach (Column col in newColumns)
@@ -44,7 +44,7 @@ namespace CodeGenarator
 
         public static string addWithValueAllScript(bool withoutFirst = true)
         {
-            List<Column> newColumns = new List<Column>(mappedColumns);
+            List<Column> newColumns = new List<Column>(getColumnsForCsharp(Columns));
             if (withoutFirst) newColumns.RemoveAt(0);
             string script = "";
             string tabs = "\n\t\t    ";
@@ -267,7 +267,7 @@ namespace CodeGenarator
             return Function;
         }
 
-        public static string classStructure(string injectedString)
+        public static string classStructure(StringBuilder injectedString)
         {
             string structure = $@"using Microsoft.Data.SqlClient;
 using System;

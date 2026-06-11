@@ -27,6 +27,8 @@ namespace CodeGenarator
                     case "int": line += $@"{c.type} {c.name} = -1;"; break;
                     case "string": line += $@"{c.type} {c.name} = """";"; break;
                     case "DateTime": line += $@"{c.type} {c.name} = DateTime.Now;"; break;
+                    default: line += $@"int {c.name} = -1;"; break;
+
                 }
             }
             else
@@ -39,6 +41,7 @@ namespace CodeGenarator
                     case "int": line += $@"this.{c.name} = -1;"; break;
                     case "string": line += $@"this.{c.name} = """";"; break;
                     case "DateTime": line += $@"this.{c.name} = DateTime.Now;"; break;
+                    default: line += $@"this.{c.type.Substring(3)} = new {c.type}();"; break ;
                 }
 
             }
@@ -89,9 +92,17 @@ namespace CodeGenarator
         public static string thisValues()
         {
             string values = "";
-            foreach (Column c in Columns)
+            foreach (Column c in clsHelper.mappedColumns)
             {
-                values += tabs + $@"this.{c.name} = {c.name};" + "\n";
+                if(c.composition)
+                {
+
+                    string cleanName = c.name.Substring(0, c.name.Length - 2);
+                    cleanName = char.ToUpper(cleanName[0]) + cleanName.Substring(1);
+                    values += tabs + $@"this.{cleanName} = cls{cleanName}.get{cleanName}ByID({c.name});" + "\n";
+
+                }
+                else values += tabs + $@"this.{c.name} = {c.name};" + "\n";
             }
             values += tabs + "Mode = enMode.Update;\n";
         
@@ -103,11 +114,19 @@ namespace CodeGenarator
 
         public static string writeProperties()
         {
-
             string Properties = "";
             foreach (Column c in mappedColumns)
             {
-                Properties += $@"{tabs}public {c.type} {c.name} {{get; set;}}" + "\n";
+                if (c.composition)
+                {
+                    string cleanName = c.name.Substring(0, c.name.Length - 2);
+                    cleanName = char.ToUpper(cleanName[0]) + cleanName.Substring(1);
+                    Properties += $@"{tabs}public {c.type} {cleanName} {{ get; set; }}" + "\n";
+                }
+                else
+                {
+                    Properties += $@"{tabs}public {c.type} {c.name} {{ get; set; }}" + "\n";
+                }
             }
             Properties += tabs + "public enum enMode {AddNew, Update}\n" + tabs + "public enMode Mode;\n";
             return Properties;
@@ -164,7 +183,7 @@ namespace CodeGenarator
 {initalVars(columnIndex)}
                 if({DALName}.{FunctionName}({writeParametersToSend(true, columnIndex)}))
                 {{
-                    return new cls{objectName}({writeParametersToSend()});
+                    return new cls{objectName}({getRawColumnNames()});
                 }}
                     else return null;
             }}
@@ -278,12 +297,11 @@ namespace CodeGenarator
             return Function;
         }
 
-        public static string classStructure(string injectedString)
+        public static string classStructure(StringBuilder injectedString)
         {
             string classStructure = $@"using DAL;
 using System;
 using System.Data;
-using DAL;
 namespace BLL
 {{
     public class cls{objectName}

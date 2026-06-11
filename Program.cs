@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Spectre.Console;
+using System;
 using System.Collections.Generic;
-using Spectre.Console;
+using System.Configuration;
+using System.IO;
+using System.Text;
 using static CodeGenarator.clsHelper;
 
 namespace CodeGenarator
@@ -18,8 +21,31 @@ namespace CodeGenarator
             AnsiConsole.Write(new Rule("[yellow]Welcome in Joudi's Code Generator[/]").Justify(Justify.Left));
             AnsiConsole.MarkupLine("[grey]This tool generates DAL and BLL CRUD ADO.NET for you.[/]");
             AnsiConsole.MarkupLine("[red]Notice:[/] Please ensure database settings are configured in [cyan]clsHelper.connectionString[/].\n");
-            clsHelper.Columns = clsHelper.getColumnsNameAndType();
-            Run();
+
+            bool more = false;
+            do
+            {
+                Run();
+                Console.Write("\nDo you want to generate code for another table? (yes/no): ");
+                string answer = Console.ReadLine();
+                if (answer.ToLower() == "yes" || answer.ToLower() == "y")
+                {
+                    more = true;
+                    Console.Clear();
+                    AnsiConsole.Write(
+                                    new FigletText("ADO Gen Code")
+                                        .Centered()
+                                        .Color(Color.Green));
+                    AnsiConsole.Write(new Rule("[yellow]Welcome in Joudi's Code Generator[/]").Justify(Justify.Left));
+                    AnsiConsole.MarkupLine("[grey]This tool generates DAL and BLL CRUD ADO.NET for you.[/]");
+                    AnsiConsole.MarkupLine("[red]Notice:[/] Please ensure database settings are configured in [cyan]clsHelper.connectionString[/].\n");
+
+                }
+                else
+                {
+                    more = false;
+                }
+            } while (more);
 
             AnsiConsole.WriteLine();
             var signaturePanel = new Panel(
@@ -62,15 +88,17 @@ namespace CodeGenarator
                 }
 
             } while (count == 0);
+
             clsHelper.mappedColumns = clsHelper.mappingTheColumns(clsHelper.Columns);
 
             Console.Write("Enter The Class Name For Both DAL And BLL (cls First will be added on it): ");
             clsHelper.objectName = Console.ReadLine();
 
             string answer = "yes";
-            string DALFuncs = "";
-            string BLLFuncs = clsPresentation.initiateBLL();
-            string SPs = "";
+            StringBuilder DALFuncs = new StringBuilder();
+            StringBuilder BLLFuncs = new StringBuilder();
+            StringBuilder SPs = new StringBuilder();
+            BLLFuncs.Append(clsPresentation.initiateBLL());
             Console.Write("\nFor DAL, BLL, And Stored Procedures:\n");
 
             // Get By:
@@ -78,11 +106,10 @@ namespace CodeGenarator
             List<string> getByColumns = clsPresentation.getBy();
             foreach (string colName in getByColumns)
             {
-                clsHelper.Column C = clsHelper.makeMappedColumnByName(colName);
                 clsHelper.Column column = clsHelper.makeColumnByName(colName);
-                SPs += clsSPs.selectByColumnSP(column);
-                DALFuncs += clsDAL.getRecordByColumnFunc(C);
-                BLLFuncs += clsBLL.getByFunc(C);
+                SPs.Append(clsSPs.selectByColumnSP(column));
+                DALFuncs.Append(clsDAL.getRecordByColumnFunc(column));
+                BLLFuncs.Append(clsBLL.getByFunc(column));
             }
 
             // Update:
@@ -91,9 +118,9 @@ namespace CodeGenarator
             answer = Console.ReadLine();
             if (answer.ToLower() == "yes" || answer.ToLower() == "y")
             {
-                DALFuncs += clsDAL.updateFunc(clsHelper.mappedColumns[0]);
-                BLLFuncs += clsBLL.updateFunc();
-                SPs += clsSPs.updateSP();
+                DALFuncs.Append(clsDAL.updateFunc(clsHelper.mappedColumns[0]));
+                BLLFuncs.Append(clsBLL.updateFunc());
+                SPs.Append(clsSPs.updateSP());
 
 
             }
@@ -105,9 +132,9 @@ namespace CodeGenarator
             if (answer.ToLower() == "yes" || answer.ToLower() == "y")
             {
                 Column C = clsHelper.mappedColumns[0];
-                DALFuncs += clsDAL.deleteFunc(C);
-                BLLFuncs += clsBLL.deleteFunc(C);
-                SPs += clsSPs.deleteSP();
+                DALFuncs.Append(clsDAL.deleteFunc(C));
+                BLLFuncs.Append(clsBLL.deleteFunc(C));
+                SPs.Append(clsSPs.deleteSP());
             }
 
             // Add:
@@ -116,9 +143,9 @@ namespace CodeGenarator
             answer = Console.ReadLine();
             if (answer.ToLower() == "yes" || answer.ToLower() == "y")
             {
-                DALFuncs += clsDAL.addFunc();
-                BLLFuncs += clsBLL.addFunc();
-                SPs += clsSPs.addSP();
+                DALFuncs.Append(clsDAL.addFunc());
+                BLLFuncs.Append(clsBLL.addFunc());
+                SPs.Append(clsSPs.addSP());
 
             }
 
@@ -131,12 +158,11 @@ namespace CodeGenarator
                 List<string> Columns = clsPresentation.existBy();
                 foreach (string colName in Columns)
                 {
-                    clsHelper.Column C = clsHelper.makeMappedColumnByName(colName);
                     clsHelper.Column column = clsHelper.makeColumnByName(colName);
-                    
-                    DALFuncs += clsDAL.isExistsFunc(C);
-                    BLLFuncs += clsBLL.isExistsFunc(C);
-                    SPs += clsSPs.isExistByColumnSP(C);
+
+                    DALFuncs.Append(clsDAL.isExistsFunc(column));
+                    BLLFuncs.Append(clsBLL.isExistsFunc(column));
+                    SPs.Append(clsSPs.isExistByColumnSP(column));
 
                 }
             }
@@ -148,9 +174,9 @@ namespace CodeGenarator
             answer = Console.ReadLine();
             if (answer.ToLower() == "yes" || answer.ToLower() == "y")
             {
-                DALFuncs += clsDAL.getAllFunc();
-                BLLFuncs += clsBLL.getAllFunc();
-                SPs += clsSPs.selectAllSP();
+                DALFuncs.Append(clsDAL.getAllFunc());
+                BLLFuncs.Append(clsBLL.getAllFunc());
+                SPs.Append(clsSPs.selectAllSP());
                 Console.WriteLine("GetAll Method Generated, do you want 'GetAll By' ? (yes/no): ");
                 answer = Console.ReadLine();
                 if (answer.ToLower() == "yes" || answer.ToLower() == "y")
@@ -158,11 +184,10 @@ namespace CodeGenarator
                     List<string> Columns = clsPresentation.getAllBy();
                     foreach (string colName in Columns)
                     {
-                        clsHelper.Column C = clsHelper.makeMappedColumnByName(colName);
                         clsHelper.Column column = clsHelper.makeColumnByName(colName);
-                        SPs += clsSPs.selectAllBySP(column);
-                        BLLFuncs += clsBLL.getAllByFunc(C);
-                        DALFuncs += clsDAL.getAllByColumnFunc(C);
+                        SPs.Append(clsSPs.selectAllBySP(column));
+                        BLLFuncs.Append(clsBLL.getAllByFunc(column));
+                        DALFuncs.Append(clsDAL.getAllByColumnFunc(column));
 
                     }
                 }
@@ -171,7 +196,7 @@ namespace CodeGenarator
             answer = Console.ReadLine();
             if (answer.ToLower() == "yes" || answer.ToLower() == "y")
             {
-                BLLFuncs += clsBLL.saveFunc();
+                BLLFuncs.Append(clsBLL.saveFunc());
 
 
             }
@@ -183,10 +208,41 @@ namespace CodeGenarator
             Console.WriteLine("\n\n\n" + clsDAL.classStructure(DALFuncs) + "\n\n\n");
             Console.WriteLine("\nBLL:");
             Console.WriteLine("\n\n\n" + clsBLL.classStructure(BLLFuncs) + "\n\n\n");
-            
+
+            saveFiles(DALFuncs, BLLFuncs, SPs);
+
+
+        }
+
+        public static void saveFiles(StringBuilder DALFuncs, StringBuilder BLLFuncs, StringBuilder SPs)
+        {
+            try
+            {
+                string projectDirectory = ConfigurationManager.AppSettings["projectDirectory"];
+                if (!Directory.Exists(projectDirectory))
+                {
+                    Directory.CreateDirectory(projectDirectory);
+                }
+                // file paths
+                string spPath = Path.Combine(projectDirectory, $"{clsHelper.tableName}_SPs.sql");
+                string dalPath = Path.Combine(projectDirectory, $"{clsHelper.className}DAL.cs");
+                string bllPath = Path.Combine(projectDirectory, $"{clsHelper.className}.cs");
+
+                // Save files
+                File.WriteAllText(spPath, SPs.ToString());
+                File.WriteAllText(dalPath, clsDAL.classStructure(DALFuncs));
+                File.WriteAllText(bllPath, clsBLL.classStructure(BLLFuncs));
+
+                AnsiConsole.MarkupLine($"\n[green]✔ Success:[/] Files generated and saved successfully!");
+                AnsiConsole.MarkupLine($"[grey]Stored Procedures:[/] [cyan]{spPath}[/]");
+                AnsiConsole.MarkupLine($"[grey]DAL Class:[/] [cyan]{dalPath}[/]");
+                AnsiConsole.MarkupLine($"[grey]BLL Class:[/] [cyan]{bllPath}[/]");
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"\n[red]❌ Error while saving files:[/] {ex.Message}");
             }
 
-
+        }
     }
-
 }
